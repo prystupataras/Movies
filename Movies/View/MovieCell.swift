@@ -12,12 +12,44 @@ class MovieCell: UITableViewCell {
     @IBOutlet weak var movieImageView: UIImageView!
     @IBOutlet weak var titleYearLabel: UILabel!
     @IBOutlet weak var genresLabel: UILabel!
-    @IBOutlet weak var ratingLabel: UILabel! // Or RatingView
+    @IBOutlet weak var ratingLabel: UILabel!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+        movieImageView.layer.cornerRadius = 8
+        contentView.layer.cornerRadius = 8 
+        contentView.layer.shadowOpacity = 0.5
+        contentView.layer.shadowRadius = 4
+        contentView.layer.shadowColor = UIColor.white.cgColor
+      }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        // Optional: Update image based on orientation (if needed)
+        if UIDevice.current.orientation.isLandscape {
+            // Update image or layout for landscape
+        } else {
+            // Update image or layout for portrait
+        }
+    }
+    
     func configure(with movie: Movie) {
-        movieImageView.image = UIImage(named: movie.imageName)
-        titleYearLabel.text = movie.title + ", " + movie.year
-        genresLabel.text = movie.genres.joined(separator: ", ")
-        ratingLabel.text = String(movie.rating) // Or update RatingView
+        titleYearLabel.text = movie.titleText + ", " + movie.yearText
+        let names = movie.genres?.map { genre -> String in
+            return genre.name
+        }
+        
+        genresLabel.text = names?.joined(separator: ", ")
+        
+        ratingLabel.text = String(movie.voteAverage) // Or update RatingView
+        
+        ImageDownloader.shared.downloadImage(from: movie.backdropURL) { image in
+            guard image != nil else { return }
+            DispatchQueue.main.async {
+                self.movieImageView.image = image
+            }
+        }
     }
 }

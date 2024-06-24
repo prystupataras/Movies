@@ -8,7 +8,7 @@
 import UIKit
 
 class MovieListVC: UIViewController, MovieListViewModelDelegate {
-    
+
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var navigationBarItem: UINavigationItem!
     
@@ -35,7 +35,16 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
     }
     
     func moviesDidChange(_ viewModel: MovieListVM) {
-        tableView.reloadData()
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+    }
+    
+    func movieUpdated(_ row: Int) {
+        tableView.beginUpdates()
+        let indexPath = IndexPath(row: row, section: 0)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+        tableView.endUpdates()
     }
     
     @objc func buttonTapped() {

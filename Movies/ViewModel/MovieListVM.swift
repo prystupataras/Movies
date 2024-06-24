@@ -9,6 +9,7 @@ import UIKit
 
 protocol MovieListViewModelDelegate: AnyObject {
     func moviesDidChange(_ viewModel: MovieListVM)
+    func movieUpdated(_ row: Int)
 }
 
 class MovieListVM {
@@ -17,20 +18,35 @@ class MovieListVM {
     private var movies: [Movie] = []
 
     func fetchMovies() {
-        // Simulate data fetching from a service or repository (using Dependency Injection)
-        movies = [
-            Movie(title: "The Shawshank Redemption", year: "1994", imageName: "movie1", genres: ["Drama", "Crime"], rating: 4.8),
-            Movie(title: "The Godfather", year: "1972", imageName: "movie2", genres: ["Crime", "Drama"], rating: 4.9),
-            Movie(title: "The Dark Knight", year: "2008", imageName: "movie3", genres: ["Action", "Thriller"], rating: 4.6)
-        ]
-        delegate?.moviesDidChange(self)
+        NetworkService.shared.getMovies(onSuccess: { (movies) in
+            self.movies = movies
+            self.delegate?.moviesDidChange(self)
+        }) { (errorMessage) in
+            print(errorMessage)
+        }
+    }
+    
+    func fetchMovie(for index: Int) {
+        NetworkService.shared.getMovie(by: self.movies[index].id, onSuccess: { (movie) in
+            self.movies[index] = movie[0]
+            self.delegate?.movieUpdated(index)
+        }) { (errorMessage) in
+            print(errorMessage)
+        }
     }
 
     func numberOfMovies() -> Int {
+        print("numberOfMovies \(movies.count)")
         return movies.count
     }
 
     func movie(at index: Int) -> Movie {
         return movies[index]
+    }
+    
+    func updateIfNeed(_ movie: Movie) {
+        if movie.titleText == "n/a" || movie.yearText == "n/a" {
+//            fetchMovie(for: <#T##Int#>)
+        }
     }
 }
