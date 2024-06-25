@@ -8,49 +8,81 @@
 import UIKit
 
 protocol MovieListViewModelDelegate: AnyObject {
-    func moviesDidChange(_ viewModel: MovieListVM)
     func movieUpdated(_ row: Int)
 }
 
 class MovieListVM {
     weak var delegate: MovieListViewModelDelegate?
 
-    private var movies: [Movie] = []
+    private let networkManager = NetworkManager.shared
+    
+    private var movies: [Movie]      = []
+    private var genres: [MovieGenre] = []
+    
+    private var currentPage = 1
+    private var isFetchingMoreMovies = false
+    
+    func fetchMovie(for id: Int, completion: @escaping (Movie?, Error?) -> Void) {
+        self.networkManager.fetchMovie(id: id) { newMovie, error in
+            if let error = error {
+                completion(nil, error)
+                return
+            }
+            
+            completion(newMovie, nil)
+        }
+        
+    }
+    
+    func fetchMoviesBySort(sortDomain: String, completion: @escaping ([Movie], Error?) -> Void) {
+        guard !isFetchingMoreMovies else { return }
+        isFetchingMoreMovies = true
+        
+        networkManager.fetchMoviesBySort(sortDomain: sortDomain, page: currentPage) { [weak self] newMovies, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                completion([], error)
+                self.isFetchingMoreMovies = false
+                return
+            }
 
-    func fetchMovies() {
-        NetworkService.shared.getMovies(onSuccess: { (movies) in
-            self.movies = movies
-            self.delegate?.moviesDidChange(self)
-        }) { (errorMessage) in
-            print(errorMessage)
+            self.movies.append(contentsOf: newMovies)
+            self.updateIfNeed()
+            self.currentPage += 1
+            completion(self.movies, nil)
+            self.isFetchingMoreMovies = false
         }
     }
     
-    func fetchDetail(for movie: Movie?) {
-        guard let movie = movie else { return }
-        NetworkService.shared.getMovie(by: movie.id, onSuccess: { (movie) in
-            if let index = self.movies.firstIndex(where: { $0.id == movie[0].id }) {
-                self.movies[index] = movie[0]
-                print(movie[0])
-            }
-//            self.delegate?.movieUpdated(index)
-        }) { (errorMessage) in
-            print(errorMessage)
-        }
+    func cleanMovies() {
+        currentPage = 1
+        isFetchingMoreMovies = false
+        movies.removeAll()
     }
-
-    func numberOfMovies() -> Int {
-        print("numberOfMovies \(movies.count)")
+    
+    func numberOfRowsInSection() -> Int {
         return movies.count
     }
-
+    
     func movie(at index: Int) -> Movie {
         return movies[index]
     }
     
-    func updateIfNeed(_ movie: Movie) {
-        if movie.titleText == "n/a" || movie.yearText == "n/a" {
-//            fetchMovie(for: <#T##Int#>)
+    func isFetching() -> Bool {
+        return isFetchingMoreMovies
+    }
+    
+    func updateIfNeed() {
+        let shouldUpdate = self.movies.filter { $0.genres == nil }
+        
+        for movie in shouldUpdate {
+            networkManager.fetchMovie(id: movie.id) { movie, error in
+                guard let movie = movie else { return }
+                let index = self.movies.firstIndex(where: { $0.id == movie.id })!
+                self.movies[index] = movie
+                self.delegate?.movieUpdated(index)
+            }
         }
     }
 }

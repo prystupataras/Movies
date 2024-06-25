@@ -18,18 +18,17 @@ class DetailVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configure()
-    }
-    
-    private var viewModel: MovieListVM!
-    
-    var movie: Movie? {
-        didSet {
-            viewModel?.fetchDetail(for: movie)
+        viewModel.fetchMovie(for: self.id) { movie, error in
+            self.configure(movie)
         }
     }
     
-    func inject(viewModel: MovieListVM) {
+    private var id: Int!
+    private var viewModel: MovieListVM!
+    
+    
+    func inject(for id: Int, viewModel: MovieListVM) {
+        self.id = id
         self.viewModel = viewModel
     }
     
@@ -42,8 +41,8 @@ class DetailVC: UIViewController {
     }
     
     
-    private func configure() {
-        guard let movie = self.movie else { return }
+    private func configure(_ movie: Movie?) {
+        guard let movie = movie else { return }
         
         nameLbl.text = movie.titleText
         

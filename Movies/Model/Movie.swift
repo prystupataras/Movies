@@ -15,14 +15,11 @@ struct MovieResponse: Decodable {
 struct Movie: Decodable {
     
     let id: Int
-    let originalTitle: String?
     let title: String?
     let backdropPath: String?
     let posterPath: String?
     let overview: String
     let voteAverage: Double
-    let voteCount: Int
-    let runtime: Int?
     let releaseDate: String?
     let video: Bool?
     

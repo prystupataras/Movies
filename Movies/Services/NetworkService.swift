@@ -6,111 +6,54 @@
 //
 
 import Foundation
-//import Alamofire
+import Alamofire
 
-typealias SuccessCallback = (_ result   : Array<Movie> ) -> Void
-typealias ErrorCallback   = (_ message  : String ) -> Void
-
-class NetworkService {
-    static let shared =  NetworkService()
+class NetworkManager {
+    static  let shared = NetworkManager()
     
-    private var onSuccess: SuccessCallback?
-    private var onError: ErrorCallback?
+    private let concurrentQueue = DispatchQueue(label: "com.example.concurrentFetchingQueue", attributes: .concurrent)
     
-    private var testCounter: Int = 1
-    
-    let session = URLSession(configuration: .default)
-    
-    func getMovies(onSuccess: @escaping (Array<Movie>) -> Void, onError: @escaping ErrorCallback) {
-        self.onSuccess = onSuccess
-        self.onError = onError
+    func fetchMovie(id: Int, completion: @escaping (Movie?, Error?) -> Void) {
+        let url = Domain.baseUrl + Domain.movie + "/\(id)"
+        let parameters: [String: Any] = [
+            "api_key": Domain.key,
+        ]
         
-        getMovies(.URL_BASE + .URL_TRAND + .API_DAY + .API_KEY)
-    }
-    
-    func getMovie(by id: Int, onSuccess:  @escaping (Array<Movie>) -> Void, onError:  @escaping ErrorCallback) {
-        self.onSuccess = onSuccess
-        self.onError = onError
-        
-        getMovie(.URL_BASE + .API_MOVIE + "/\(id)" + .API_KEY)
-    }
-    
-    private func getMovies(_ path: String?) {
-        
-        guard let url = URL(string: path ?? "") else { self.onError?("Can`t reatch url path"); return }
-        
-        let task = session.dataTask(with: url) { (data, response, error) in
-            
-            DispatchQueue.global(qos: .background).async{
-//            DispatchQueue.main.async {
-                if let error = error {
-                    self.onError?(error.localizedDescription)
-                    return
-                }
-                
-                guard let data = data, let response = response as? HTTPURLResponse else {
-                    self.onError?("Invalid data or response")
-                    return
-                }
-                
-                do {
-                    if response.statusCode == 200 {
-                    
-                        
-                        let response = try Utils.jsonDecoder.decode(MovieResponse.self, from: data)
-                        self.onSuccess?(response.results)
-
-                    } else {
-                        let err = try JSONDecoder().decode(APIError.self, from: data)
-                        self.onError?(err.message)
+        concurrentQueue.async {
+            AF.request(url, method: .get, parameters: parameters)
+                .responseDecodable(of: Movie.self, decoder: Utils.jsonDecoder) { response in
+                    switch response.result {
+                    case .success(let movie):
+                        completion(movie, nil)
+                    case .failure(let error):
+                        completion(nil, error)
                     }
                 }
-                catch {
-                    self.onError?(error.localizedDescription)
-                    print(error)
-                }
-            }
-            
         }
-        task.resume()
     }
     
-    private func getMovie(_ path: String?) {
+    func fetchMoviesBySort(sortDomain: String, page: Int, completion: @escaping ([Movie], Error?) -> Void) {
         
-        guard let url = URL(string: path ?? "") else { self.onError?("Can`t reatch url path"); return }
+        let url = Domain.baseUrl + Domain.discover
         
-        let task = session.dataTask(with: url) { (data, response, error) in
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                if let error = error {
-                    self.onError?(error.localizedDescription)
-                    return
-                }
-                
-                guard let data = data, let response = response as? HTTPURLResponse else {
-                    self.onError?("Invalid data or response")
-                    return
-                }
-                
-                do {
-                    if response.statusCode == 200 {
-                    
-                        
-                        let movie = try Utils.jsonDecoder.decode(Movie.self, from: data)
-                        self.onSuccess?([movie])
-
-                    } else {
-                        let err = try JSONDecoder().decode(APIError.self, from: data)
-                        self.onError?(err.message)
+        let parameters: [String: Any] = [
+            "api_key": Domain.key,
+            "sort_by": sortDomain,
+            "page": page
+        ]
+        
+        print(sortDomain)
+        
+        concurrentQueue.async {
+            AF.request(url, method: .get, parameters: parameters)
+                .responseDecodable(of: MovieResponse.self, decoder: Utils.jsonDecoder) { response in
+                    switch response.result {
+                    case .success(let movieResponse):
+                        completion(movieResponse.results, nil)
+                    case .failure(let error):
+                        completion([], error)
                     }
                 }
-                catch {
-                    self.onError?(error.localizedDescription)
-                    print(error)
-                }
-            }
-            
         }
-        task.resume()
     }
 }

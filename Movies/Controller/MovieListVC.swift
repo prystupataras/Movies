@@ -13,46 +13,66 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
     @IBOutlet weak var navigationBarItem: UINavigationItem!
     
     private lazy var viewModel: MovieListVM = {
-        // Create and configure the MovieListViewModel instance with any needed dependencies
         let viewModel = MovieListVM()
-        // ... (configure dependencies)
         return viewModel
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.delegate = self
-        viewModel.fetchMovies()
+        
+        self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
+        
         
         tableView.dataSource = self
-        tableView.delegate = self // For cell selection (optional)
+        tableView.delegate   = self
         
-        let barButtonItem = UIBarButtonItem(barButtonSystemItem: .compose,
+        
+        let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "list.dash"),
+                                            style: .plain,
                                             target: self,
                                             action: #selector(buttonTapped))
+        
+        
+//        let barButtonItem = UIBarButtonItem(barButtonSystemItem: .compose,
+//                                            target: self,
+//                                            action: #selector(buttonTapped))
 
         navigationBarItem.rightBarButtonItem = barButtonItem
     }
     
-    func moviesDidChange(_ viewModel: MovieListVM) {
-        DispatchQueue.main.async {
+    private func fetchBySort(_ sortId: Int) {
+        var sortOption = Domain.new
+        switch sortId {
+        case 0:
+            sortOption = Domain.new
+        case 1:
+            sortOption = Domain.rating
+        case 2:
+            sortOption = Domain.popular
+        default:
+            sortOption = Domain.new
+        }
+        
+        
+        viewModel.fetchMoviesBySort(sortDomain: sortOption) { [weak self] movies, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error fetching movies:", error)
+                return
+            }
+            
             self.tableView.reloadData()
         }
     }
     
-    func movieUpdated(_ row: Int) {
-        tableView.beginUpdates()
-        let indexPath = IndexPath(row: row, section: 0)
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-        tableView.endUpdates()
-    }
-    
     @objc func buttonTapped() {
-        let actionSheet = UIAlertController(title: "Choose an option", message: nil, preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(title: "Sort by:", message: nil, preferredStyle: .actionSheet)
         
-        let options = ["Popular today",
-                       "Popular this week",
-                       "Ratings"]
+        let options = ["New",
+                       "Ratings",
+                       "Popular"]
         
         let defaults = UserDefaults.standard
         var selectedIndex = defaults.integer(forKey: "lastSelectedIndex")
@@ -64,6 +84,9 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
                 selectedIndex = index
                 defaults.set(selectedIndex, forKey: "lastSelectedIndex")
                 // Update UI or perform action based on selected option
+                self.viewModel.cleanMovies()
+                self.tableView.reloadData()
+                self.fetchBySort(selectedIndex)
             }
             
             if index == selectedIndex {
@@ -74,20 +97,37 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
             
             actionSheet.addAction(action)
         }
+        
+        let cencel = UIAlertAction(title: "cancel", style: .cancel)
+        actionSheet.addAction(cencel)
+        
         present(actionSheet, animated: true)
+    }
+    
+    func movieUpdated(_ row: Int) {
+        tableView.beginUpdates()
+        let indexPath = IndexPath(row: row, section: 0)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+        tableView.endUpdates()
     }
 }
 
 extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.numberOfMovies()
+        return viewModel.numberOfRowsInSection()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "movieCell", for: indexPath) as! MovieCell
         cell.configure(with: viewModel.movie(at: indexPath.row))
         return cell
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y + scrollView.frame.height >= scrollView.contentSize.height - 100 && !viewModel.isFetching() {
+            self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
+        }
     }
     
     func tableView(_ tableView: UITableView, performPrimaryActionForRowAt indexPath: IndexPath) {
@@ -100,8 +140,7 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
             barBtn.title = ""
             navigationItem.backBarButtonItem = barBtn
             
-            vc.inject(viewModel: self.viewModel)
-            vc.movie = sender as? Movie
+            vc.inject(for: (sender as! Movie).id, viewModel: self.viewModel)
         }
     }
 }

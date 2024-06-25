@@ -9,28 +9,27 @@ import UIKit
 
 class ImageDownloader {
     static let shared =  ImageDownloader()
-
+    
+    let image = UIImage(named: "no.picture")
+    
     func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
         URLSession.shared.dataTask(with: url) { data, response, error in
             // Check for errors
             if let error = error {
-                print("Error downloading image: \(error.localizedDescription)")
-                completion(nil)
+                completion(self.image)
                 return
             }
             
             // Check for response status
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {
-                print("Invalid response")
-                completion(nil)
+                completion(self.image)
                 return
             }
             
             // Check if data is valid
             guard let data = data, let image = UIImage(data: data) else {
-                print("Invalid image data")
-                completion(nil)
+                completion(self.image)
                 return
             }
             
