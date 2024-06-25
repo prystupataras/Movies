@@ -24,8 +24,10 @@ struct Movie: Decodable {
     let voteCount: Int
     let runtime: Int?
     let releaseDate: String?
+    let video: Bool?
     
     let genres: [MovieGenre]?
+    let originCountry: [String]?
     
     static private let yearFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -53,6 +55,14 @@ struct Movie: Decodable {
             return "n/a"
         }
         return Movie.yearFormatter.string(from: date)
+    }
+    
+    var hasTrailer: Bool {
+        guard let hasVideo = self.video else {
+            return false
+        }
+        
+        return hasVideo
     }
 }
 

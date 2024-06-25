@@ -26,10 +26,14 @@ class MovieListVM {
         }
     }
     
-    func fetchMovie(for index: Int) {
-        NetworkService.shared.getMovie(by: self.movies[index].id, onSuccess: { (movie) in
-            self.movies[index] = movie[0]
-            self.delegate?.movieUpdated(index)
+    func fetchDetail(for movie: Movie?) {
+        guard let movie = movie else { return }
+        NetworkService.shared.getMovie(by: movie.id, onSuccess: { (movie) in
+            if let index = self.movies.firstIndex(where: { $0.id == movie[0].id }) {
+                self.movies[index] = movie[0]
+                print(movie[0])
+            }
+//            self.delegate?.movieUpdated(index)
         }) { (errorMessage) in
             print(errorMessage)
         }

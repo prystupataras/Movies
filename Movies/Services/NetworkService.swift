@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Alamofire
+//import Alamofire
 
 typealias SuccessCallback = (_ result   : Array<Movie> ) -> Void
 typealias ErrorCallback   = (_ message  : String ) -> Void
