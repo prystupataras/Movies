@@ -18,7 +18,7 @@ class MovieCell: UITableViewCell {
         super.awakeFromNib()
 
         movieImageView.layer.cornerRadius = 8
-        contentView.layer.cornerRadius = 8 
+        contentView.layer.cornerRadius = 8
         contentView.layer.shadowOpacity = 0.5
         contentView.layer.shadowRadius = 4
         contentView.layer.shadowColor = UIColor.white.cgColor
