@@ -1,0 +1,24 @@
+{
+  "originHash" : "3e0176151bd77d9b30c134c1e2aa0789a72b0a9cffe30d3a479a6f04612414be",
+  "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire",
+      "state" : {
+        "revision" : "0c8cb78d05b6d067ee331c05058ff4dedcb45ffa",
+        "version" : "5.0.0"
+      }
+    },
+    {
+      "identity" : "youtube-ios-player-helper",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/youtube/youtube-ios-player-helper.git",
+      "state" : {
+        "revision" : "f57129cd4380ec0a74dd3a59da3270a1d653d59b",
+        "version" : "1.0.4"
+      }
+    }
+  ],
+  "version" : 3
+}
