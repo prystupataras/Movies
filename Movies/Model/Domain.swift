@@ -12,10 +12,16 @@ struct Domain {
     static let baseUrl  = "https://api.themoviedb.org/3"
     
     static let movie = "/movie"
-    static let discover = "/discover" + Domain.movie
+//    static let discover = "/discover" + Domain.movie
 //    static let discover = Domain.movie + "/popular"
     
-    static let new     = "primary_release_data.desc"
-    static let popular = "vote_count.desc"
-    static let rating  = "vote_average.desc"
+//    static let new     = "primary_release_data.desc"
+//    static let popular = "vote_count.desc"
+//    static let rating  = "vote_average.desc"
+    
+    
+    static let popular    = Domain.movie + "/popular"
+    static let topRated   = Domain.movie + "/top_rated"
+    static let nowPlaying = Domain.movie + "/now_playing"
+    static let upcoming   = Domain.movie + "/upcoming"
 }

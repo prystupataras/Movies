@@ -42,16 +42,18 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
     }
     
     private func fetchBySort(_ sortId: Int) {
-        var sortOption = Domain.new
+        var sortOption = Domain.popular
         switch sortId {
         case 0:
-            sortOption = Domain.new
-        case 1:
-            sortOption = Domain.rating
-        case 2:
             sortOption = Domain.popular
+        case 1:
+            sortOption = Domain.topRated
+        case 2:
+            sortOption = Domain.nowPlaying
+        case 3:
+            sortOption = Domain.upcoming
         default:
-            sortOption = Domain.new
+            sortOption = Domain.popular
         }
         
         
@@ -70,9 +72,10 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
     @objc func buttonTapped() {
         let actionSheet = UIAlertController(title: "Sort by:", message: nil, preferredStyle: .actionSheet)
         
-        let options = ["New",
-                       "Ratings",
-                       "Popular"]
+        let options = ["Popular",
+                       "Top Rated",
+                       "Now Playing",
+                       "Upcoming"]
         
         let defaults = UserDefaults.standard
         var selectedIndex = defaults.integer(forKey: "lastSelectedIndex")

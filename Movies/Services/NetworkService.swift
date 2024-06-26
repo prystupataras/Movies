@@ -34,15 +34,12 @@ class NetworkManager {
     
     func fetchMoviesBySort(sortDomain: String, page: Int, completion: @escaping ([Movie], Error?) -> Void) {
         
-        let url = Domain.baseUrl + Domain.discover
+        let url = Domain.baseUrl + sortDomain
         
         let parameters: [String: Any] = [
             "api_key": Domain.key,
-            "sort_by": sortDomain,
             "page": page
         ]
-        
-        print(sortDomain)
         
         concurrentQueue.async {
             AF.request(url, method: .get, parameters: parameters)
