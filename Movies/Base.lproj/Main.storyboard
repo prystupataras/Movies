@@ -34,7 +34,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="OXP-Mw-zlZ">
-                                <rect key="frame" x="0.0" y="103" width="393" height="715"/>
+                                <rect key="frame" x="0.0" y="164" width="393" height="654"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="movieCell" rowHeight="231" id="tDH-6N-SJI" customClass="MovieCell" customModule="Movies" customModuleProvider="target">
@@ -96,19 +96,44 @@
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
+                            <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="WXc-bW-qfv">
+                                <rect key="frame" x="111.33333333333333" y="409.66666666666669" width="170.33333333333337" height="33"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nothing there." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kk7-1E-kwY">
+                                        <rect key="frame" x="0.0" y="0.0" width="170.33333333333334" height="33"/>
+                                        <fontDescription key="fontDescription" name="AvenirNext-Bold" family="Avenir Next" pointSize="24"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="KWe-MX-hya">
+                                <rect key="frame" x="0.0" y="103" width="393" height="56"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="IPC-JU-3Xh"/>
+                                </connections>
+                            </searchBar>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="pp2-0B-HBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="OXP-Mw-zlZ" firstAttribute="top" secondItem="KWe-MX-hya" secondAttribute="bottom" constant="5" id="2Tt-yp-gpl"/>
+                            <constraint firstItem="KWe-MX-hya" firstAttribute="leading" secondItem="pp2-0B-HBY" secondAttribute="leading" id="4A3-lC-Vx5"/>
+                            <constraint firstItem="WXc-bW-qfv" firstAttribute="centerX" secondItem="JwJ-Nz-kGu" secondAttribute="centerX" id="4Pv-5C-qGe"/>
                             <constraint firstItem="pp2-0B-HBY" firstAttribute="bottom" secondItem="OXP-Mw-zlZ" secondAttribute="bottom" id="64s-SR-QH9"/>
                             <constraint firstItem="OXP-Mw-zlZ" firstAttribute="leading" secondItem="pp2-0B-HBY" secondAttribute="leading" id="IBb-2F-X4W"/>
+                            <constraint firstItem="KWe-MX-hya" firstAttribute="top" secondItem="pp2-0B-HBY" secondAttribute="top" id="V2I-q9-paE"/>
                             <constraint firstItem="pp2-0B-HBY" firstAttribute="trailing" secondItem="OXP-Mw-zlZ" secondAttribute="trailing" id="b8z-QZ-IBS"/>
-                            <constraint firstItem="OXP-Mw-zlZ" firstAttribute="top" secondItem="pp2-0B-HBY" secondAttribute="top" id="pbR-jU-p1t"/>
+                            <constraint firstItem="WXc-bW-qfv" firstAttribute="centerY" secondItem="JwJ-Nz-kGu" secondAttribute="centerY" id="uCd-OI-fbR"/>
+                            <constraint firstItem="KWe-MX-hya" firstAttribute="trailing" secondItem="pp2-0B-HBY" secondAttribute="trailing" id="wwr-4f-Fyr"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Popular Movies" id="wYI-nZ-wa9"/>
                     <connections>
+                        <outlet property="backgroundLbl" destination="Kk7-1E-kwY" id="wcL-fI-ppy"/>
+                        <outlet property="backgroundStackView" destination="WXc-bW-qfv" id="jHN-ga-Rxn"/>
                         <outlet property="navigationBarItem" destination="wYI-nZ-wa9" id="1d4-52-ZWB"/>
+                        <outlet property="searchBar" destination="KWe-MX-hya" id="0V6-84-yyn"/>
                         <outlet property="tableView" destination="OXP-Mw-zlZ" id="ydp-7A-b61"/>
                         <segue destination="5qd-ma-RRx" kind="show" identifier="DetailVC" id="mfV-6n-lvc"/>
                     </connections>

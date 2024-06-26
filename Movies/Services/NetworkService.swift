@@ -14,41 +14,56 @@ class NetworkManager {
     private let concurrentQueue = DispatchQueue(label: "com.example.concurrentFetchingQueue", attributes: .concurrent)
     
     func fetchMovie(id: Int, completion: @escaping (Movie?, Error?) -> Void) {
-        let url = Domain.baseUrl + Domain.movie + "/\(id)"
-        let parameters: [String: Any] = [
-            "api_key": Domain.key,
-        ]
+        let urlPath = Domain.baseUrl + Domain.movie + "/\(id)"
         
-        concurrentQueue.async {
-            AF.request(url, method: .get, parameters: parameters)
-                .responseDecodable(of: Movie.self, decoder: Utils.jsonDecoder) { response in
-                    switch response.result {
-                    case .success(let movie):
-                        completion(movie, nil)
-                    case .failure(let error):
-                        completion(nil, error)
-                    }
-                }
-        }
+        fetchData(with: urlPath, completion: { (movie: Movie?, error: Error?) -> Void in
+            if let movie = movie {
+                completion(movie, nil)
+            } else {
+                completion(nil, error)
+            }
+        })
     }
     
     func fetchMoviesBySort(sortDomain: String, page: Int, completion: @escaping ([Movie], Error?) -> Void) {
         
-        let url = Domain.baseUrl + sortDomain
+        let urlPath = Domain.baseUrl + sortDomain
         
-        let parameters: [String: Any] = [
-            "api_key": Domain.key,
-            "page": page
-        ]
+        fetchData(with: urlPath, parameters: ["page" : page], completion: { (movies: MovieResponse?, error: Error?) -> Void in
+            if let movies = movies {
+                completion(movies.results, nil)
+            } else {
+                completion([], error)
+            }
+        })
+    }
+    
+    func searchMovie(query: String, completion: @escaping ([Movie], Error?) -> Void) {
+        let urlPath = Domain.baseUrl + Domain.search
+
+        fetchData(with: urlPath, parameters: ["query" : query], completion: { (movies: MovieResponse?, error: Error?) -> Void in
+            if let movies = movies {
+                completion(movies.results, nil)
+            } else {
+                completion([], error)
+            }
+        })
+    }
+}
+
+
+private extension NetworkManager {
+    func fetchData<T: Decodable>(with urlString: String, parameters: [String: Any] = [:], completion: @escaping (T?, Error?) -> Void) {
+        let params = ["api_key": Domain.key].merging(parameters) { (current, new) in new }
         
         concurrentQueue.async {
-            AF.request(url, method: .get, parameters: parameters)
-                .responseDecodable(of: MovieResponse.self, decoder: Utils.jsonDecoder) { response in
+            AF.request(urlString, method: .get, parameters: params)
+                .responseDecodable(of: T.self, decoder: Utils.jsonDecoder) { response in
                     switch response.result {
-                    case .success(let movieResponse):
-                        completion(movieResponse.results, nil)
+                    case .success(let data):
+                        completion(data, nil)
                     case .failure(let error):
-                        completion([], error)
+                        completion(nil, error)
                     }
                 }
         }

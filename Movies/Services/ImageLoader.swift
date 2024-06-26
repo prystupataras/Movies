@@ -15,7 +15,7 @@ class ImageDownloader {
     func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
         URLSession.shared.dataTask(with: url) { data, response, error in
             // Check for errors
-            if let error = error {
+            if error != nil {
                 completion(self.image)
                 return
             }

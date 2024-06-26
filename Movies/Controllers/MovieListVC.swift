@@ -6,11 +6,19 @@
 //
 
 import UIKit
+import Network
 
-class MovieListVC: UIViewController, MovieListViewModelDelegate {
-
+class MovieListVC: UIViewController {
+    
+    @IBOutlet weak var backgroundStackView: UIStackView!
+    @IBOutlet weak var backgroundLbl: UILabel!
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var navigationBarItem: UINavigationItem!
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    private let monitor = NWPathMonitor()
+    private var progressView: DownloadProgressView?
     
     private lazy var viewModel: MovieListVM = {
         let viewModel = MovieListVM()
@@ -20,6 +28,13 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.delegate = self
+        
+        progressView = DownloadProgressView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        
+        if let progressView = progressView {
+            backgroundStackView.isHidden = false
+            backgroundStackView.addSubview(progressView)
+        }
         
         self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
         
@@ -32,44 +47,55 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
                                             style: .plain,
                                             target: self,
                                             action: #selector(buttonTapped))
-        
-        
-//        let barButtonItem = UIBarButtonItem(barButtonSystemItem: .compose,
-//                                            target: self,
-//                                            action: #selector(buttonTapped))
-
         navigationBarItem.rightBarButtonItem = barButtonItem
+        
+        monitor.start(queue: DispatchQueue.main)
     }
     
-    private func fetchBySort(_ sortId: Int) {
-        var sortOption = Domain.popular
-        switch sortId {
-        case 0:
-            sortOption = Domain.popular
-        case 1:
-            sortOption = Domain.topRated
-        case 2:
-            sortOption = Domain.nowPlaying
-        case 3:
-            sortOption = Domain.upcoming
-        default:
-            sortOption = Domain.popular
-        }
+}
+
+extension MovieListVC : MovieListViewModelDelegate {
+    
+    func moviesDidChange(_ viewModel: MovieListVM) {
+        self.backgroundStackView.isHidden = !(viewModel.numberOfRowsInSection() == 0)
         
+        self.progressView?.removeFromSuperview()
+        tableView.reloadData()
+    }
+    
+    func movieUpdated(_ row: Int) {
+        tableView.beginUpdates()
+        let indexPath = IndexPath(row: row, section: 0)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+        tableView.endUpdates()
+    }
+}
+
+private extension MovieListVC {
+    
+    func fetchBySort(_ sortId: Int) {
+        guard let sortOption = SortDomain(rawValue: sortId)?.description else { return }
         
-        viewModel.fetchMoviesBySort(sortDomain: sortOption) { [weak self] movies, error in
-            guard let self = self else { return }
-            
+        viewModel.fetchMoviesBySort(sortDomain: sortOption) { error in
             if let error = error {
-                print("Error fetching movies:", error)
+                self.showAlert(message: "Error fetching movies:, \(error) ")
                 return
             }
-            
-            self.tableView.reloadData()
         }
     }
     
-    @objc func buttonTapped() {
+    func showAlert(message: String, buttonTitle: String = "OK", completion: ((UIAlertAction) -> Void)? = nil) {
+        
+        let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: buttonTitle, style: .default, handler: completion)
+        alertController.addAction(action)
+        present(alertController, animated: true, completion: nil)
+    }
+}
+
+@objc extension MovieListVC {
+    
+    func buttonTapped() {
         let actionSheet = UIAlertController(title: "Sort by:", message: nil, preferredStyle: .actionSheet)
         
         let options = ["Popular",
@@ -86,7 +112,7 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
             let action = UIAlertAction(title: option, style: .default) { action in
                 selectedIndex = index
                 defaults.set(selectedIndex, forKey: "lastSelectedIndex")
-                // Update UI or perform action based on selected option
+                
                 self.viewModel.cleanMovies()
                 self.tableView.reloadData()
                 self.fetchBySort(selectedIndex)
@@ -107,11 +133,8 @@ class MovieListVC: UIViewController, MovieListViewModelDelegate {
         present(actionSheet, animated: true)
     }
     
-    func movieUpdated(_ row: Int) {
-        tableView.beginUpdates()
-        let indexPath = IndexPath(row: row, section: 0)
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-        tableView.endUpdates()
+    func dismissKeyboardOnInteraction() {
+        searchBar.resignFirstResponder()
     }
 }
 
@@ -128,12 +151,25 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y + scrollView.frame.height >= scrollView.contentSize.height - 100 && !viewModel.isFetching() {
-            self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
+        if searchBar.text?.count == 0 {
+            if scrollView.contentOffset.y + scrollView.frame.height >= scrollView.contentSize.height - 100 && !viewModel.isFetching() {
+                self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
+            }
         }
     }
     
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        dismissKeyboardOnInteraction()
+    }
+    
     func tableView(_ tableView: UITableView, performPrimaryActionForRowAt indexPath: IndexPath) {
+        dismissKeyboardOnInteraction()
+        
+        if monitor.currentPath.status != .satisfied {
+            self.showAlert(message: .offlineMessage)
+            return
+        }
+        
         performSegue(withIdentifier: "DetailVC", sender: viewModel.movie(at: indexPath.row))
     }
     
@@ -148,3 +184,32 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
+extension MovieListVC: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        viewModel.searchMovie(query: searchText) { error in
+            if let error = error {
+                self.showAlert(message: "Error searchin movies:, \(error) ")
+                return
+            }
+        }
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        viewModel.setSerching(flag: true)
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        if searchBar.text?.count == 0 {
+            viewModel.setSerching(flag: false)
+        }
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        viewModel.searchMovie(query: searchBar.text ?? "") { error in
+            if let error = error {
+                self.showAlert(message: "Error searchin movies:, \(error) ")
+                return
+            }
+        }
+    }
+}

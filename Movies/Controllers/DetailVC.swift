@@ -16,9 +16,12 @@ class DetailVC: UIViewController {
     @IBOutlet weak var trailerBtn:     UIButton!
     @IBOutlet weak var overviewTV:     UITextView!
     
+    private var progressView: DownloadProgressView?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.fetchMovie(for: self.id) { movie, error in
+            guard let movie = movie else { return }
             self.configure(movie)
         }
     }
@@ -58,9 +61,16 @@ class DetailVC: UIViewController {
         
         trailerBtn.isHidden = !movie.hasTrailer
         
+        progressView = DownloadProgressView(frame: posterImage.bounds)
+
+        if let progressView = progressView {
+            posterImage.addSubview(progressView)
+        }
+        
         ImageDownloader.shared.downloadImage(from: movie.posterURL) { image in
             guard image != nil else { return }
             DispatchQueue.main.async {
+                self.progressView?.removeFromSuperview()
                 self.posterImage.image = image
             }
         }
