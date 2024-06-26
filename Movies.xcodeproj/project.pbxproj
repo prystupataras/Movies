@@ -27,6 +27,8 @@
 		E8AA40582C2C36DF000DD6C0 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AA40572C2C36DF000DD6C0 /* AppError.swift */; };
 		E8AA405A2C2C3B85000DD6C0 /* DownloadProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AA40592C2C3B85000DD6C0 /* DownloadProgressView.swift */; };
 		E8AA405F2C2C3BE5000DD6C0 /* ActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AA405E2C2C3BE5000DD6C0 /* ActivityIndicator.swift */; };
+		E8AA40712C2C7901000DD6C0 /* TrailerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AA40702C2C7901000DD6C0 /* TrailerVC.swift */; };
+		E8AA40742C2C7931000DD6C0 /* YouTubeiOSPlayerHelper in Frameworks */ = {isa = PBXBuildFile; productRef = E8AA40732C2C7931000DD6C0 /* YouTubeiOSPlayerHelper */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +53,7 @@
 		E8AA40572C2C36DF000DD6C0 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
 		E8AA40592C2C3B85000DD6C0 /* DownloadProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadProgressView.swift; sourceTree = "<group>"; };
 		E8AA405E2C2C3BE5000DD6C0 /* ActivityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicator.swift; sourceTree = "<group>"; };
+		E8AA40702C2C7901000DD6C0 /* TrailerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +62,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8AA40532C2B05FE000DD6C0 /* Alamofire in Frameworks */,
+				E8AA40742C2C7931000DD6C0 /* YouTubeiOSPlayerHelper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +129,7 @@
 				E80F92172C296FE400AD31E0 /* MovieListVC.swift */,
 				E8AA402C2C2ACFAF000DD6C0 /* DetailVC.swift */,
 				E8AA402E2C2AEA7B000DD6C0 /* PosterVC.swift */,
+				E8AA40702C2C7901000DD6C0 /* TrailerVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -182,6 +187,7 @@
 			name = Movies;
 			packageProductDependencies = (
 				E8AA40522C2B05FE000DD6C0 /* Alamofire */,
+				E8AA40732C2C7931000DD6C0 /* YouTubeiOSPlayerHelper */,
 			);
 			productName = Movies;
 			productReference = E80F92102C296FE400AD31E0 /* Movies.app */;
@@ -213,6 +219,7 @@
 			mainGroup = E80F92072C296FE400AD31E0;
 			packageReferences = (
 				E8AA40512C2B05FE000DD6C0 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				E8AA40722C2C7931000DD6C0 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */,
 			);
 			productRefGroup = E80F92112C296FE400AD31E0 /* Products */;
 			projectDirPath = "";
@@ -249,6 +256,7 @@
 				E80F922B2C29781600AD31E0 /* Movie.swift in Sources */,
 				E8AA40582C2C36DF000DD6C0 /* AppError.swift in Sources */,
 				E8AA402D2C2ACFAF000DD6C0 /* DetailVC.swift in Sources */,
+				E8AA40712C2C7901000DD6C0 /* TrailerVC.swift in Sources */,
 				E8AA405A2C2C3B85000DD6C0 /* DownloadProgressView.swift in Sources */,
 				E8AA40262C29BB8E000DD6C0 /* ImageLoader.swift in Sources */,
 				E8AA40242C29B033000DD6C0 /* Utils.swift in Sources */,
@@ -406,6 +414,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = U4CB493TXH;
@@ -435,6 +444,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = U4CB493TXH;
@@ -491,6 +501,14 @@
 				version = 5.0.0;
 			};
 		};
+		E8AA40722C2C7931000DD6C0 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/youtube/youtube-ios-player-helper.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -498,6 +516,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E8AA40512C2B05FE000DD6C0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		E8AA40732C2C7931000DD6C0 /* YouTubeiOSPlayerHelper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E8AA40722C2C7931000DD6C0 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */;
+			productName = YouTubeiOSPlayerHelper;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

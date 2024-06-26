@@ -18,7 +18,9 @@ class MovieListVC: UIViewController {
     @IBOutlet weak var searchBar: UISearchBar!
     
     private let monitor = NWPathMonitor()
-    private var progressView: DownloadProgressView?
+    private var progressView: DownloadProgressView = DownloadProgressView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    
+    private let refreshControl = UIRefreshControl()
     
     private lazy var viewModel: MovieListVM = {
         let viewModel = MovieListVM()
@@ -28,26 +30,24 @@ class MovieListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.delegate = self
-        
-        progressView = DownloadProgressView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-        
-        if let progressView = progressView {
-            backgroundStackView.isHidden = false
-            backgroundStackView.addSubview(progressView)
-        }
-        
-        self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
-        
+        searchBar.delegate = self
         
         tableView.dataSource = self
         tableView.delegate   = self
         
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+        
+        backgroundStackView.isHidden = false
+        backgroundStackView.addSubview(progressView)
         
         let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "list.dash"),
                                             style: .plain,
                                             target: self,
                                             action: #selector(buttonTapped))
         navigationBarItem.rightBarButtonItem = barButtonItem
+        
+        self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
         
         monitor.start(queue: DispatchQueue.main)
     }
@@ -59,7 +59,7 @@ extension MovieListVC : MovieListViewModelDelegate {
     func moviesDidChange(_ viewModel: MovieListVM) {
         self.backgroundStackView.isHidden = !(viewModel.numberOfRowsInSection() == 0)
         
-        self.progressView?.removeFromSuperview()
+        self.progressView.removeFromSuperview()
         tableView.reloadData()
     }
     
@@ -131,6 +131,15 @@ private extension MovieListVC {
         actionSheet.addAction(cencel)
         
         present(actionSheet, animated: true)
+    }
+    
+    @objc func handleRefresh(_ sender: UIRefreshControl) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.viewModel.cleanMovies()
+            self.tableView.reloadData()
+            self.fetchBySort(UserDefaults.standard.integer(forKey: "lastSelectedIndex"))
+            self.refreshControl.endRefreshing()
+        }
     }
     
     func dismissKeyboardOnInteraction() {

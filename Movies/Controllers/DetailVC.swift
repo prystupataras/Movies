@@ -6,8 +6,11 @@
 //
 
 import UIKit
+import AVKit
+import AVFoundation
 
 class DetailVC: UIViewController {
+    
     @IBOutlet weak var posterImage:    UIImageView!
     @IBOutlet weak var nameLbl:        UILabel!
     @IBOutlet weak var countryYearLbl: UILabel!
@@ -29,6 +32,11 @@ class DetailVC: UIViewController {
     private var id: Int!
     private var viewModel: MovieListVM!
     
+    private var trailers: [MovieVideo] = []
+    
+    private let playerViewController = AVPlayerViewController()
+    private var player: AVPlayer?
+    
     
     func inject(for id: Int, viewModel: MovieListVM) {
         self.id = id
@@ -36,7 +44,7 @@ class DetailVC: UIViewController {
     }
     
     @IBAction func trailerBtnWasPressed(_ sender: UIButton) {
-        //show trailer if need
+        performSegue(withIdentifier: "playerVC", sender: trailers.first)
     }
     
     @objc func posterTapped() {
@@ -59,7 +67,8 @@ class DetailVC: UIViewController {
         
         overviewTV.text = movie.overview
         
-        trailerBtn.isHidden = !movie.hasTrailer
+        trailers = movie.youtubeTrailers ?? []
+        trailerBtn.isHidden = trailers.isEmpty
         
         progressView = DownloadProgressView(frame: posterImage.bounds)
 
@@ -86,6 +95,14 @@ class DetailVC: UIViewController {
             navigationItem.backBarButtonItem = barBtn
             
             vc.image = sender as? UIImage
+        }
+        
+        if let vc = segue.destination as? TrailerVC {
+            let barBtn = UIBarButtonItem()
+            barBtn.title = ""
+            navigationItem.backBarButtonItem = barBtn
+            
+            vc.video = sender as? MovieVideo
         }
     }
 }

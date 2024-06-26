@@ -16,7 +16,11 @@ class NetworkManager {
     func fetchMovie(id: Int, completion: @escaping (Movie?, Error?) -> Void) {
         let urlPath = Domain.baseUrl + Domain.movie + "/\(id)"
         
-        fetchData(with: urlPath, completion: { (movie: Movie?, error: Error?) -> Void in
+        let params: [String : Any] = [
+            "append_to_response": "videos",
+        ]
+        
+        fetchData(with: urlPath, parameters: params, completion: { (movie: Movie?, error: Error?) -> Void in
             if let movie = movie {
                 completion(movie, nil)
             } else {
@@ -54,7 +58,13 @@ class NetworkManager {
 
 private extension NetworkManager {
     func fetchData<T: Decodable>(with urlString: String, parameters: [String: Any] = [:], completion: @escaping (T?, Error?) -> Void) {
-        let params = ["api_key": Domain.key].merging(parameters) { (current, new) in new }
+        let defaultParams: [String: Any] = [
+                "api_key"       : Domain.key,
+                "language"      : "en-US",
+                "include_adult" : "false",
+                "region"        : "US",
+            ]
+        let params = defaultParams.merging(parameters) { (current, new) in new }
         
         concurrentQueue.async {
             AF.request(urlString, method: .get, parameters: params)

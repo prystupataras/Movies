@@ -109,6 +109,10 @@
                             <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="KWe-MX-hya">
                                 <rect key="frame" x="0.0" y="103" width="393" height="56"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <scopeButtonTitles>
+                                    <string>Title</string>
+                                    <string>Title</string>
+                                </scopeButtonTitles>
                                 <connections>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="IPC-JU-3Xh"/>
                                 </connections>
@@ -183,7 +187,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="226" translatesAutoresizingMaskIntoConstraints="NO" id="G1z-2d-OPr">
                                                 <rect key="frame" x="10" y="380" width="353" height="40"/>
                                                 <subviews>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="srz-NJ-84V">
+                                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleAspectFit" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="srz-NJ-84V">
                                                         <rect key="frame" x="0.0" y="0.0" width="60" height="40"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="40" id="6L7-Xr-QFd"/>
@@ -191,7 +195,7 @@
                                                         </constraints>
                                                         <color key="tintColor" systemColor="systemFillColor"/>
                                                         <state key="normal" title="Button"/>
-                                                        <buttonConfiguration key="configuration" style="plain" title="Tub"/>
+                                                        <buttonConfiguration key="configuration" style="plain" image="youtube_button"/>
                                                         <connections>
                                                             <action selector="trailerBtnWasPressed:" destination="5qd-ma-RRx" eventType="touchUpInside" id="n8R-Yj-kdc"/>
                                                         </connections>
@@ -268,6 +272,7 @@
                         <outlet property="ratingLbl" destination="eaO-7V-s1x" id="xdm-sM-xO9"/>
                         <outlet property="trailerBtn" destination="srz-NJ-84V" id="h24-f7-41N"/>
                         <segue destination="nqi-wH-QZV" kind="presentation" identifier="posterVC" id="x3j-kM-UeO"/>
+                        <segue destination="Nql-ZH-7gP" kind="presentation" identifier="playerVC" id="L0d-n9-rIi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ajw-k7-EhX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -317,10 +322,41 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="X0c-TW-vmb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="846.56488549618314" y="-78.16901408450704"/>
+            <point key="canvasLocation" x="-366" y="744"/>
+        </scene>
+        <!--TrailerVC-->
+        <scene sceneID="iNl-Ts-dUX">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2Tz-5D-pt7" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <viewController id="Nql-ZH-7gP" customClass="TrailerVC" customModule="Movies" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="oxK-kS-fh1">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UCb-Hg-QAp" customClass="YTPlayerView">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="GnR-Md-gmY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="GnR-Md-gmY" firstAttribute="bottom" secondItem="UCb-Hg-QAp" secondAttribute="bottom" id="Xjb-dC-iNE"/>
+                            <constraint firstItem="UCb-Hg-QAp" firstAttribute="leading" secondItem="GnR-Md-gmY" secondAttribute="leading" id="fYG-V6-DnC"/>
+                            <constraint firstItem="UCb-Hg-QAp" firstAttribute="top" secondItem="GnR-Md-gmY" secondAttribute="top" id="jVy-we-jqE"/>
+                            <constraint firstItem="GnR-Md-gmY" firstAttribute="trailing" secondItem="UCb-Hg-QAp" secondAttribute="trailing" id="kJw-w1-gSe"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="playerView" destination="UCb-Hg-QAp" id="wAG-yY-HAi"/>
+                    </connections>
+                </viewController>
+            </objects>
+            <point key="canvasLocation" x="445" y="744"/>
         </scene>
     </scenes>
     <resources>
+        <image name="youtube_button" width="60" height="46"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
